@@ -3,6 +3,8 @@
 > Collections of neural network modules and functions implemented by TensorFlow, 
 each method is defined in an individual `.py` file.
 
+> TensorFlow>=1.8.0
+
 ## Implementation List
 - [x] [Character-Aware Neural Language Models](http://arxiv.org/abs/1508.06615v4) for character representations, 
 in [char_cnn.py](/nns/char_cnn.py).
