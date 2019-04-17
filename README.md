@@ -11,15 +11,19 @@ in [char_cnn.py](/nns/char_cnn.py).
 - [x] [Neural Tensor Network](https://cs.stanford.edu/~danqi/papers/nips2013.pdf), in [neural_tensor_network.py](
 /nns/neural_tensor_network.py).
 - [x] [Self-attention Mechanism](https://arxiv.org/pdf/1409.0473.pdf), in [self_attention.py](/nns/self_attention.py).
-- [ ] Gated CNN for [Language Modeling with Gated Convolutional Networks](https://arxiv.org/abs/1612.08083), in 
+- [x] Gated CNN for [Language Modeling with Gated Convolutional Networks](https://arxiv.org/abs/1612.08083), in 
 [gated_cnn.py](/nns/gated_cnn.py).
 - [x] [Densely connected LSTM](https://arxiv.org/pdf/1802.00889.pdf), in [densely_connect_rnn.py](
 /nns/densely_connect_rnn.py).
 - [x] [Focal loss](http://openaccess.thecvf.com/content_ICCV_2017/papers/Lin_Focal_Loss_for_ICCV_2017_paper.pdf), 
 in [focal_loss.py](/nns/focal_loss.py).
-- [ ] [Multihead attention](), in [multihead_attention.py](/nns/multihead_attention.py).
-- [ ] [Transformer](), in [transformer.py](/nns/transformer.py).
+- [ ] [Multihead attention](https://arxiv.org/pdf/1706.03762.pdf), in [multihead_attention.py](
+/nns/multihead_attention.py).
+- [ ] [Transformer](https://arxiv.org/pdf/1706.03762.pdf), in [transformer.py](/nns/transformer.py).
 - [x] [Gaussian Error Linear Unit](https://arxiv.org/abs/1606.08415), in [gelu.py](/nns/gelu.py).
+- [x] Gradient reversal from [Domain-Adversarial Training of Neural Networks](https://arxiv.org/pdf/1505.07818v4.pdf), 
+in [invert_gradient.py](/nns/invert_gradient.py).
+- [x] [Layer normalization](https://arxiv.org/abs/1607.06450), in [layer_norm.py](/nns/layer_norm.py)
 
 ### Machine Learning Methods
 - [x] Kmeans clustering, in [kmeans_clustering.py](/mls/kmeans_clustering.py).
