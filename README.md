@@ -17,7 +17,7 @@ in [char_cnn.py](/nns/char_cnn.py).
 /nns/densely_connect_rnn.py).
 - [x] [Focal loss](http://openaccess.thecvf.com/content_ICCV_2017/papers/Lin_Focal_Loss_for_ICCV_2017_paper.pdf), 
 in [focal_loss.py](/nns/focal_loss.py).
-- [ ] [Multihead attention](https://arxiv.org/pdf/1706.03762.pdf), in [multihead_attention.py](
+- [x] [Multihead attention](https://arxiv.org/pdf/1706.03762.pdf), in [multihead_attention.py](
 /nns/multihead_attention.py).
 - [ ] [Transformer](https://arxiv.org/pdf/1706.03762.pdf), in [transformer.py](/nns/transformer.py).
 - [x] [Gaussian Error Linear Unit](https://arxiv.org/abs/1606.08415), in [gelu.py](/nns/gelu.py).
