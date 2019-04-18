@@ -6,11 +6,12 @@ def weight_initializer(stddev=0.02):
     return tf.truncated_normal_initializer(mean=0.0, stddev=stddev)
 
 
-def dropout(inputs, drop_rate=0.0):
-    if drop_rate is None or drop_rate == 0.0:
-        return inputs
-    else:
-        return tf.nn.dropout(inputs, keep_prob=1.0 - drop_rate)
+def dropout(inputs, drop_rate=0.0, name="dropout"):
+    with tf.variable_scope(name):
+        if drop_rate is None or drop_rate == 0.0:
+            return inputs
+        else:
+            return tf.nn.dropout(inputs, keep_prob=1.0 - drop_rate)
 
 
 def get_shape(inputs):
@@ -54,6 +55,25 @@ def combine_heads(inputs):
 def multihead_attention(inputs1, inputs2, attention_mask=None, num_heads=1, head_size=512, attention_drop_rate=0.0,
                         hidden_drop_rate=0.0, query_act=None, key_act=None, value_act=None, kernel_init=0.02,
                         reuse=None, name="multihead_attention"):
+    """Multihead attention
+    cf. https://github.com/google-research/bert/blob/master/modeling.py
+    cf. https://github.com/tensorflow/models/tree/master/official/transformer/model
+    cf. https://github.com/Kyubyong/transformer/blob/master/modules.py
+    :param inputs1: input tensor with shape [batch_size, seq_len_1, dim_1]
+    :param inputs2: input tensor with shape [batch_size, seq_len_2, dim_2] (for self-attention, input1 == inputs2)
+    :param attention_mask: int32 tensor of with shape [batch_size, seq_len_1, seq_len_2]
+    :param num_heads: number of heads
+    :param head_size: head size
+    :param attention_drop_rate:
+    :param hidden_drop_rate:
+    :param query_act: query activation function
+    :param key_act: key activation function
+    :param value_act: value activation function
+    :param kernel_init: standard deviation of truncated normal initializer
+    :param reuse: reuse
+    :param name: name
+    :return: attention outputs
+    """
     with tf.variable_scope(name, reuse=reuse):
         # feed forward layer
         query = tf.layers.dense(inputs1, units=num_heads * head_size, activation=query_act, name="query",
@@ -71,7 +91,7 @@ def multihead_attention(inputs1, inputs2, attention_mask=None, num_heads=1, head
         attention_scores = tf.multiply(attention_scores, 1.0 / math.sqrt(float(head_size)))
         if attention_mask is not None:  # add bias
             attention_mask = tf.expand_dims(attention_mask, axis=[1])  # [batch_size, 1, seq_len_1, seq_len_2]
-            bias = (1.0 - tf.cast(attention_mask, dtype=tf.float32)) * 1e-9
+            bias = (1.0 - tf.cast(attention_mask, dtype=tf.float32)) * (-2 ** 32 + 1)
             attention_scores += bias
         attention_probs = tf.nn.softmax(attention_scores, axis=-1)  # [batch_size, num_heads, seq_len_1, seq_len_2]
         attention_probs = dropout(attention_probs, drop_rate=attention_drop_rate)
@@ -79,7 +99,7 @@ def multihead_attention(inputs1, inputs2, attention_mask=None, num_heads=1, head
         context = tf.matmul(attention_probs, value)  # [batch_size, num_heads, seq_len_1, head_size]
         context = combine_heads(context)  # [batch_size, seq_len_1, num_heads * head_size]
         # feed forward layer
-        context = tf.layers.dense(context, units=num_heads * head_size, name="context",
+        context = tf.layers.dense(context, units=num_heads * head_size, name="output",
                                   kernel_initializer=weight_initializer(stddev=kernel_init))
-        context = dropout(context, drop_rate=hidden_drop_rate)
+        context = dropout(context, drop_rate=hidden_drop_rate, name="attention_dropout")
         return context
