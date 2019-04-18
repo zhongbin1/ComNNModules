@@ -2,6 +2,58 @@ import math
 import tensorflow as tf
 
 
+def embedding_post_process(input_tensor, use_token_type=False, token_type_ids=None, token_type_vocab_size=16,
+                           use_position_emb=True, max_position_emb=512, kernel_init=0.02, drop_rate=0.1, reuse=None,
+                           name="embedding_post_process"):
+    """This function is from BERT model, I found it is different from the original transformer model in TensorFlow
+    official transformer model
+    (https://github.com/tensorflow/models/blob/master/official/transformer/model/model_utils.py)
+    cf. https://github.com/google-research/bert/blob/master/modeling.py
+    :param input_tensor: input tensor with shape [batch_size, seq_len, embedding_size]
+    :param use_token_type: whether to add embeddings for `token_type_ids`.
+    :param token_type_ids: int32 tensor of shape [batch_size, seq_length].
+    :param token_type_vocab_size: the vocabulary size of `token_type_ids`.
+    :param use_position_emb: whether to add position embeddings for the position of each token in the sequence.
+    :param max_position_emb: maximum sequence length that might ever be used with this model.
+    :param kernel_init:  standard deviation of truncated normal initializer.
+    :param drop_rate: dropout rate.
+    :param reuse: reuse.
+    :param name: name.
+    :return: float tensor with same shape as `input_tensor`.
+    """
+    with tf.variable_scope(name, reuse=reuse):
+        input_shape = get_shape(input_tensor)
+        batch_size, seq_len, dim = input_shape[0], input_shape[1], input_shape[2]
+        output = input_tensor
+        if use_token_type:
+            assert token_type_ids is not None, "token_type_ids must be specified"
+            token_type_table = tf.get_variable(name="token_type_embeddings", shape=[token_type_vocab_size, dim],
+                                               initializer=weight_initializer(kernel_init))
+            # This vocab will be small so we always do one-hot here, since it is always faster for a small vocabulary.
+            flat_token_type_ids = tf.reshape(token_type_ids, [-1])
+            one_hot_ids = tf.one_hot(flat_token_type_ids, depth=token_type_vocab_size)
+            token_type_embeddings = tf.matmul(one_hot_ids, token_type_table)
+            token_type_embeddings = tf.reshape(token_type_embeddings, shape=[batch_size, seq_len, dim])
+            output += token_type_embeddings
+        if use_position_emb:
+            assert_op = tf.assert_less_equal(seq_len, max_position_emb)
+            with tf.control_dependencies([assert_op]):
+                full_position_embeddings = tf.get_variable(name="position_embeddings", shape=[max_position_emb, dim],
+                                                           initializer=weight_initializer(kernel_init))
+                position_embeddings = tf.slice(full_position_embeddings, [0, 0], [seq_len, -1])
+                position_broadcast_shape = []
+                num_dims = len(output.shape.as_list())
+                for _ in range(num_dims - 2):
+                    position_broadcast_shape.append(1)
+                position_broadcast_shape.extend([seq_len, dim])
+                position_embeddings = tf.reshape(position_embeddings, position_broadcast_shape)
+                output += position_embeddings
+
+        output = layer_norm(output, epsilon=1e-8, name="layer_norm_emb")
+        output = dropout(output, drop_rate=drop_rate, name="emb_dropout")
+        return output
+
+
 def label_smoothing(inputs, epsilon=0.1):
     dim = inputs.get_shape().as_list()
     return (1 - epsilon) * inputs + (epsilon / dim)
