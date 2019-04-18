@@ -19,6 +19,8 @@ in [char_cnn.py](/nns/char_cnn.py).
 in [focal_loss.py](/nns/focal_loss.py).
 - [x] [Multihead attention](https://arxiv.org/pdf/1706.03762.pdf), in [multihead_attention.py](
 /nns/multihead_attention.py).
+- [ ] [Transformer](https://arxiv.org/pdf/1706.03762.pdf) Encoder, in [transformer_encoder.py](
+/nns/transformer_encoder.py).
 - [ ] [Transformer](https://arxiv.org/pdf/1706.03762.pdf), in [transformer.py](/nns/transformer.py).
 - [x] [Gaussian Error Linear Unit](https://arxiv.org/abs/1606.08415), in [gelu.py](/nns/gelu.py).
 - [x] Gradient reversal from [Domain-Adversarial Training of Neural Networks](https://arxiv.org/pdf/1505.07818v4.pdf), 
