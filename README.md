@@ -21,7 +21,9 @@ in [focal_loss.py](/nns/focal_loss.py).
 /nns/multihead_attention.py).
 - [x] [Transformer](https://arxiv.org/pdf/1706.03762.pdf) Encoder, in [transformer_encoder.py](
 /nns/transformer_encoder.py).
-- [ ] [Transformer](https://arxiv.org/pdf/1706.03762.pdf), in [transformer.py](/nns/transformer.py).
+- [x] [Transformer](https://arxiv.org/pdf/1706.03762.pdf), in [tensorflow/models/official/transformer](
+https://github.com/tensorflow/models/tree/master/official/transformer/model) (extra-link to tensorflow official models)
+or in [Kyubyong/transformer](https://github.com/Kyubyong/transformer) (extra-link to Kyubyong's repo).
 - [x] [Gaussian Error Linear Unit](https://arxiv.org/abs/1606.08415), in [gelu.py](/nns/gelu.py).
 - [x] Gradient reversal from [Domain-Adversarial Training of Neural Networks](https://arxiv.org/pdf/1505.07818v4.pdf), 
 in [invert_gradient.py](/nns/invert_gradient.py).
