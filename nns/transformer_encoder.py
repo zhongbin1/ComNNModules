@@ -2,13 +2,42 @@ import math
 import tensorflow as tf
 
 
+def add_position_embeddings(x, min_timescale=1.0, max_timescale=1.0e4):
+    """Adds a bunch of sinusoids of different frequencies to a Tensor. Each channel of the input Tensor is incremented
+    by a sinusoid of a different frequency and phase. This allows attention to learn to use absolute and relative
+    positions. Timing signals should be added to some precursors of both the query and the memory inputs to attention.
+    The use of relative position is possible because sin(x+y) and cos(x+y) can be expressed in terms of y, sin(x) and
+    cos(x). In particular, we use a geometric sequence of timescales starting with min_timescale and ending with
+    max_timescale.  The number of different timescales is equal to channels / 2. For each timescale, we generate the two
+    sinusoidal signals sin(timestep/timescale) and cos(timestep/timescale).  All of these sinusoids are concatenated in
+    the channels dimension.
+    Args:
+        x: a Tensor with shape [batch, length, channels]
+        min_timescale: a float
+        max_timescale: a float
+    Returns:
+        a Tensor the same shape as x.
+    """
+    length, channels = tf.shape(x)[1], tf.shape(x)[2]
+    position, num_timescales = tf.to_float(tf.range(length)), channels // 2
+    log_timescale_increment = (tf.log(float(max_timescale) / float(min_timescale)) / (tf.to_float(num_timescales) - 1))
+    inv_timescales = min_timescale * tf.exp(tf.to_float(tf.range(num_timescales)) * -log_timescale_increment)
+    scaled_time = tf.expand_dims(position, 1) * tf.expand_dims(inv_timescales, 0)
+    signal = tf.concat([tf.sin(scaled_time), tf.cos(scaled_time)], axis=1)
+    signal = tf.pad(signal, [[0, 0], [0, tf.mod(channels, 2)]])
+    signal = tf.reshape(signal, [1, length, channels])
+    return x + signal
+
+
 def embedding_post_process(input_tensor, use_token_type=False, token_type_ids=None, token_type_vocab_size=16,
                            use_position_emb=True, max_position_emb=512, kernel_init=0.02, drop_rate=0.1, reuse=None,
                            name="embedding_post_process"):
-    """This function is from BERT model, I found it is different from the original transformer model in TensorFlow
-    official transformer model
-    (https://github.com/tensorflow/models/blob/master/official/transformer/model/model_utils.py)
+    """
     cf. https://github.com/google-research/bert/blob/master/modeling.py
+    Note that the positional encoding of this function is from BERT model, which is different from the TensorFlow
+    official transformer (https://github.com/tensorflow/models/blob/master/official/transformer/model/model_utils.py),
+    where the positional encoding is learned one (ref. https://arxiv.org/pdf/1705.03122.pdf), while the official one is
+    fixed (ref. https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf or see `add_position_embeddings`).
     :param input_tensor: input tensor with shape [batch_size, seq_len, embedding_size]
     :param use_token_type: whether to add embeddings for `token_type_ids`.
     :param token_type_ids: int32 tensor of shape [batch_size, seq_length].
